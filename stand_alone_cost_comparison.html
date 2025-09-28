@@ -1,4 +1,12 @@
-<!DOCTYPE html>
+.footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+            padding: 1rem;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -238,14 +246,102 @@
             color: #555;
         }
 
-        .footer-note {
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            color: #666;
-            padding: 1rem;
-            background: #f0f0f0;
+        .project-explanation {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            border-left: 4px solid #007bff;
+        }
+
+        .project-explanation h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .system-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .system-card {
+            background: white;
+            padding: 1.5rem;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #28a745;
+        }
+
+        .system-card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .system-card ul {
+            margin-top: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .system-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .recommendations {
+            background: #e8f5e8;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 3rem;
+            border-left: 4px solid #28a745;
+        }
+
+        .recommendations h3 {
+            color: #2e7d32;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 3px solid #28a745;
+        }
+
+        .totals-summary {
+            background: #fff3cd;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border-left: 4px solid #ffc107;
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .total-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-card h4 {
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .total-card .amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
         }
 
         .surface-mount-note {
@@ -288,6 +384,33 @@
             <p>Compare installation methods and costs for your fence projects</p>
         </div>
 
+        <!-- Project Explanation -->
+        <div class="project-explanation">
+            <h2>📋 Your Fence Project Overview</h2>
+            <p>You have ordered two different fence systems for your property. Here's what you purchased and your installation options:</p>
+            
+            <div class="system-cards">
+                <div class="system-card">
+                    <h3>🏡 Front Yard System</h3>
+                    <p><strong>WamBam Traditional Picket Fence</strong> - Classic white picket fence with grooved posts</p>
+                    <ul>
+                        <li>✅ Complete system ordered (panels, posts, gate)</li>
+                        <li>⚠️ <strong>Not compatible</strong> with no-dig pipe anchors due to post size difference</li>
+                        <li>🔧 Options: Concrete installation or return for no-dig system</li>
+                    </ul>
+                </div>
+                <div class="system-card">
+                    <h3>🏡 Backyard System</h3>
+                    <p><strong>Freedom Brighton Privacy Fence</strong> - 6ft privacy panels with Set & Secure brackets</p>
+                    <ul>
+                        <li>⚠️ <strong>Incomplete order</strong> - missing critical components</li>
+                        <li>❌ No no-dig option available for this system</li>
+                        <li>🔧 Options: Complete order, return for no-dig system, or start fresh</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- Order 1: Front Yard Fence -->
         <div class="order-section">
             <div class="order-title order-1">
@@ -298,13 +421,40 @@
             </div>
         </div>
 
-        <!-- Order 2: Brighton Privacy Fence -->
+        <!-- Order 2: Backyard Privacy Fence -->
         <div class="order-section">
             <div class="order-title order-2">
-                🔒 Order 2: Brighton Privacy Fence (174 Linear Feet)
+                🔒 Backyard: Brighton Privacy Fence (174 Linear Feet)
             </div>
             <div class="scenarios-grid" id="order2-scenarios">
                 <!-- Scenarios will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Totals Summary -->
+        <div class="totals-summary">
+            <h3>💰 Project Totals Summary</h3>
+            <div class="totals-grid" id="totals-grid">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations">
+            <h3>🎯 Our Recommendations</h3>
+            <div class="recommendation-item">
+                <h4>🏡 Front Yard: Use Current Order + Concrete</h4>
+                <p><strong>Why:</strong> Your current Traditional Picket system is not compatible with no-dig anchors due to post size differences (4.5" vs 4"). The concrete option uses what you already purchased and adds only $167.50 in materials plus labor.</p>
+                <p><strong>Total additional cost:</strong> <span id="front-concrete-total">$0</span></p>
+            </div>
+            <div class="recommendation-item">
+                <h4>🔒 Backyard: Return & Buy No-Dig System</h4>
+                <p><strong>Why:</strong> Your Brighton order is missing critical components (brackets, extra posts) that cost $1,478 extra. Returning and buying a complete no-dig system saves money and installation time.</p>
+                <p><strong>Net cost after return credit:</strong> <span id="back-nodig-total">$0</span></p>
+            </div>
+            <div class="recommendation-item">
+                <h4>⏱️ Time Savings</h4>
+                <p>Recommended approach saves approximately <strong>18 hours</strong> of labor compared to concrete installation for both projects.</p>
             </div>
         </div>
 
@@ -319,7 +469,7 @@
                     </div>
                 </div>
                 <div class="summary-card">
-                    <h4 style="color: #2e7d32;">Order 2 Totals (174 ft)</h4>
+                    <h4 style="color: #2e7d32;">Backyard Totals (174 ft)</h4>
                     <div id="order2-summary">
                         <!-- Populated by JavaScript -->
                     </div>
@@ -341,11 +491,11 @@
         let fenceData = {
             order1: {
                 concrete: {
-                    title: "Concrete Installation",
+                    title: "Use Current Order + Concrete",
                     materials: [
-                        { id: 1, name: "Traditional Picket Fence Panels (VF13003)", qty: 9, price: 148.33 },
-                        { id: 2, name: "Finishing Post (VP13008)", qty: 1, price: 84.13 },
-                        { id: 3, name: "Picket Gate (VG13006)", qty: 1, price: 286.44 },
+                        { id: 1, name: "✅ Traditional Picket Fence Panels (VF13003) - PURCHASED", qty: 9, price: 0 },
+                        { id: 2, name: "✅ Finishing Post (VP13008) - PURCHASED", qty: 1, price: 0 },
+                        { id: 3, name: "✅ Picket Gate (VG13006) - PURCHASED", qty: 1, price: 0 },
                         { id: 4, name: "Concrete (60lb bags)", qty: 17, price: 7.50 },
                         { id: 5, name: "Gravel for drainage", qty: 10, price: 4.00 }
                     ],
@@ -357,19 +507,20 @@
                     ]
                 },
                 noDig: {
-                    title: "No-Dig Installation",
+                    title: "Return Order + No-Dig System",
                     materials: [
-                        { id: 1, name: "Traditional Picket Fence Panels (VF13003)", qty: 9, price: 148.33 },
-                        { id: 2, name: "Finishing Post (VP13008)", qty: 1, price: 84.13 },
-                        { id: 3, name: "Picket Gate (VG13006)", qty: 1, price: 286.44 },
-                        { id: 4, name: "Small Pipe Anchoring System (4-pack)", qty: 3, price: 93.00 },
+                        { id: 1, name: "Return current order (credit)", qty: 1, price: -1705.54 },
+                        { id: 2, name: "WamBam No-Dig Picket Panels (4×7)", qty: 9, price: 149.99 },
+                        { id: 3, name: "WamBam No-Dig Finishing Posts", qty: 1, price: 79.99 },
+                        { id: 4, name: "WamBam No-Dig Picket Gate", qty: 1, price: 299.99 },
                         { id: 5, name: "Post pounder/sledgehammer", qty: 1, price: 75.00 }
                     ],
                     labor: [
-                        { id: 1, name: "Pipe anchor installation (10 anchors)", hours: 3, rate: 45 },
-                        { id: 2, name: "Post sleeving and leveling", hours: 2, rate: 45 },
-                        { id: 3, name: "Panel assembly and installation", hours: 4, rate: 45 },
-                        { id: 4, name: "Gate installation", hours: 2, rate: 45 }
+                        { id: 1, name: "Return processing time", hours: 2, rate: 45 },
+                        { id: 2, name: "Pipe anchor installation (10 anchors)", hours: 3, rate: 45 },
+                        { id: 3, name: "Post sleeving and leveling", hours: 2, rate: 45 },
+                        { id: 4, name: "Panel assembly and installation", hours: 4, rate: 45 },
+                        { id: 5, name: "Gate installation", hours: 2, rate: 45 }
                     ]
                 }
             },
