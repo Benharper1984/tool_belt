@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Belt - Professional Utility Tools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: -1px;
+        }
+
+        .header .tagline {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .tool-card.available {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        }
+
+        .tool-card.coming-soon {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            opacity: 0.8;
+        }
+
+        .tool-card.coming-soon:hover {
+            transform: translateY(-4px);
+            cursor: default;
+        }
+
+        .tool-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .tool-card.coming-soon .tool-icon {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .tool-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .tool-card.coming-soon .tool-title {
+            color: #6c757d;
+        }
+
+        .tool-description {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .tool-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-features li {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .tool-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .tool-card.coming-soon .tool-features li::before {
+            content: '⏳';
+            color: #6c757d;
+        }
+
+        .tool-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: auto;
+        }
+
+        .status-available {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .status-coming-soon {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            box-shadow: 0 2px 10px rgba(108, 117, 125, 0.3);
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tool-card.available:hover::before {
+            opacity: 1;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .footer p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .version {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header .tagline {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .tool-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Loading animation for coming soon items */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .tool-card.coming-soon .tool-icon {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🔧 Tool Belt</h1>
+        <p class="tagline">Professional Utility Tools for Every Project</p>
+        <p class="subtitle">A collection of specialized calculators and planning tools to streamline your workflow and make informed decisions.</p>
+    </header>
+
+    <div class="container">
+        <div class="tools-grid">
+            <!-- Fence Cost Comparison Tool - Available -->
+            <div class="tool-card available" onclick="navigateToTool('stand_alone_cost_comparison.html')">
+                <div class="tool-icon">🏗️</div>
+                <h2 class="tool-title">Fence Installation Cost Comparison</h2>
+                <p class="tool-description">
+                    Compare different fence installation methods and calculate total project costs including materials, labor, and various installation approaches.
+                </p>
+                <ul class="tool-features">
+                    <li>Multiple installation methods (Concrete, No-Dig, Surface Mount)</li>
+                    <li>Interactive cost editing with real-time calculations</li>
+                    <li>Material and labor breakdowns</li>
+                    <li>Cost per linear foot analysis</li>
+                    <li>Project comparison summaries</li>
+                </ul>
+                <div class="tool-status status-available">Available Now</div>
+            </div>
+
+            <!-- Budget Planning Tool - Coming Soon -->
+            <div class="tool-card coming-soon">
+                <div class="tool-icon">💰</div>
+                <h2 class="tool-title">Project Budget Planner</h2>
+                <p class="tool-description">
+                    Plan and track project budgets with category breakdowns, cost estimates, and expense monitoring for any type of project.
+                </p>
+                <ul class="tool-features">
+                    <li>Multi-category budget organization</li>
+                    <li>Expense tracking and monitoring</li>
+                    <li>Budget vs actual comparisons</li>
+                    <li>Export capabilities</li>
+                    <li>Project timeline integration</li>
+                </ul>
+                <div class="tool-status status-coming-soon">Coming Soon</div>
+            </div>
+
+            <!-- Material Calculator - Coming Soon -->
+            <div class="tool-card coming-soon">
+                <div class="tool-icon">📐</div>
+                <h2 class="tool-title">Material Calculator</h2>
+                <p class="tool-description">
+                    Calculate material quantities for construction projects including concrete, lumber, roofing, flooring, and more.
+                </p>
+                <ul class="tool-features">
+                    <li>Multiple material types supported</li>
+                    <li>Waste factor calculations</li>
+                    <li>Unit conversion tools</li>
+                    <li>Cost estimation integration</li>
+                    <li>Project material lists</li>
+                </ul>
+                <div class="tool-status status-coming-soon">Coming Soon</div>
+            </div>
+
+            <!-- ROI Calculator - Coming Soon -->
+            <div class="tool-card coming-soon">
+                <div class="tool-icon">📈</div>
+                <h2 class="tool-title">ROI Calculator</h2>
+                <p class="tool-description">
+                    Calculate return on investment for home improvements, equipment purchases, and business decisions with detailed projections.
+                </p>
+                <ul class="tool-features">
+                    <li>Simple and complex ROI calculations</li>
+                    <li>Time-based projections</li>
+                    <li>Break-even analysis</li>
+                    <li>Comparison scenarios</li>
+                    <li>Visual charts and graphs</li>
+                </ul>
+                <div class="tool-status status-coming-soon">Coming Soon</div>
+            </div>
+
+            <!-- Time Tracker - Coming Soon -->
+            <div class="tool-card coming-soon">
+                <div class="tool-icon">⏱️</div>
+                <h2 class="tool-title">Project Time Tracker</h2>
+                <p class="tool-description">
+                    Track time spent on different project phases, calculate labor costs, and analyze productivity metrics.
+                </p>
+                <ul class="tool-features">
+                    <li>Multi-project time tracking</li>
+                    <li>Task categorization</li>
+                    <li>Hourly rate calculations</li>
+                    <li>Productivity analytics</li>
+                    <li>Export time reports</li>
+                </ul>
+                <div class="tool-status status-coming-soon">Coming Soon</div>
+            </div>
+
+            <!-- Unit Converter - Coming Soon -->
+            <div class="tool-card coming-soon">
+                <div class="tool-icon">⚖️</div>
+                <h2 class="tool-title">Universal Unit Converter</h2>
+                <p class="tool-description">
+                    Convert between different units of measurement including length, area, volume, weight, and temperature.
+                </p>
+                <ul class="tool-features">
+                    <li>Multiple unit categories</li>
+                    <li>Real-time conversion</li>
+                    <li>Precision control</li>
+                    <li>Conversion history</li>
+                    <li>Common conversions quick access</li>
+                </ul>
+                <div class="tool-status status-coming-soon">Coming Soon</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Tool Belt - Streamlining professional workflows with specialized utility tools</p>
+        <p class="version">Version 1.0 - Built with ❤️ for professionals</p>
+    </footer>
+
+    <script>
+        // Navigation function
+        function navigateToTool(toolPath) {
+            // Only navigate if the tool is available (not coming soon)
+            const clickedCard = event.currentTarget;
+            if (clickedCard.classList.contains('available')) {
+                window.location.href = toolPath;
+            }
+        }
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.tool-card');
+            
+            cards.forEach(card => {
+                // Add click effect for available tools
+                if (card.classList.contains('available')) {
+                    card.addEventListener('click', function() {
+                        // Add a brief click animation
+                        this.style.transform = 'scale(0.98)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    });
+                }
+
+                // Add hover sound effect placeholder (you could add actual sounds here)
+                card.addEventListener('mouseenter', function() {
+                    if (this.classList.contains('available')) {
+                        // Placeholder for hover sound
+                        console.log('Tool card hovered:', this.querySelector('.tool-title').textContent);
+                    }
+                });
+            });
+
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && document.activeElement.classList.contains('tool-card')) {
+                    document.activeElement.click();
+                }
+            });
+
+            // Make tool cards focusable for accessibility
+            cards.forEach(card => {
+                if (card.classList.contains('available')) {
+                    card.setAttribute('tabindex', '0');
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('aria-label', 'Navigate to ' + card.querySelector('.tool-title').textContent);
+                }
+            });
+        });
+
+        // Add a subtle parallax effect to the header
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const header = document.querySelector('.header');
+            const rate = scrolled * -0.5;
+            header.style.transform = `translateY(${rate}px)`;
+        });
+
+        // Future tool suggestion system (placeholder)
+        function suggestNewTool() {
+            const suggestions = [
+                'Loan Calculator',
+                'Energy Efficiency Calculator', 
+                'Paint Coverage Calculator',
+                'Landscaping Planner',
+                'Equipment Rental Tracker'
+            ];
+            
+            const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+            console.log(`Future tool suggestion: ${randomSuggestion}`);
+            
+            // This could be connected to a feedback system
+            return randomSuggestion;
+        }
+
+        // Analytics placeholder (you could integrate with Google Analytics, etc.)
+        function trackToolUsage(toolName) {
+            console.log(`Tool accessed: ${toolName} at ${new Date().toISOString()}`);
+            // Add your analytics code here
+        }
+    </script>
+</body>
+</html>
