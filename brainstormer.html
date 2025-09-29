@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainstorming Collaborator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .save-indicator {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .save-indicator.visible {
+            opacity: 1;
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .controls label {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .controls select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .content {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .import-section {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .import-section textarea {
+            width: 100%;
+            max-width: 600px;
+            height: 200px;
+            padding: 15px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            margin: 20px 0;
+        }
+        
+        .idea-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e0e0e0;
+            position: relative;
+        }
+        
+        .idea-card.filtered-out {
+            display: none;
+        }
+        
+        .idea-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .idea-title {
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .idea-title[contenteditable="true"] {
+            border: 2px solid #667eea;
+            padding: 5px;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        .attention-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .idea-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .icon-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .idea-description {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            border-left: 4px solid #667eea;
+        }
+        
+        .idea-description[contenteditable="true"] {
+            border: 2px solid #667eea;
+        }
+        
+        .section {
+            margin-top: 25px;
+        }
+        
+        .section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-feasibility { background: #d4edda; color: #155724; }
+        .badge-features { background: #d1ecf1; color: #0c5460; }
+        .badge-improvements { background: #fff3cd; color: #856404; }
+        .badge-clarification { background: #f8d7da; color: #721c24; }
+        .badge-audience { background: #e2d1f9; color: #4a1a6e; }
+        .badge-technical { background: #d6d8db; color: #383d41; }
+        
+        .item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .item.approved {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+        
+        .item.rejected {
+            border-color: #dc3545;
+            background: #fff5f5;
+            opacity: 0.6;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        
+        .item-text {
+            flex: 1;
+            line-height: 1.5;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .item-actions button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-approve:hover {
+            background: #218838;
+        }
+        
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-reject:hover {
+            background: #c82333;
+        }
+        
+        .btn-note {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-note:hover {
+            background: #5568d3;
+        }
+        
+        .note-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+            display: none;
+        }
+        
+        .note-section.visible {
+            display: block;
+        }
+        
+        .note-section textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            margin-top: 5px;
+            min-height: 60px;
+        }
+        
+        .note-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            font-weight: 600;
+        }
+        
+        .choice-options {
+            margin-top: 10px;
+        }
+        
+        .choice-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .choice-option input {
+            cursor: pointer;
+        }
+        
+        .choice-option label {
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .stat {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+        
+        .version-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            background: #5568d3;
+        }
+        
+        .export-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .export-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+        
+        .modal-content textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Brainstorming Collaborator</h1>
+            <p>Iterative idea refinement with Claude</p>
+            <div class="save-indicator" id="saveIndicator">✓ Saved</div>
+        </div>
+        
+        <div class="controls">
+            <label for="versionSelect">Version:</label>
+            <select id="versionSelect" disabled>
+                <option>No data loaded</option>
+            </select>
+            
+            <button class="btn btn-primary" onclick="importData()">📥 Import JSON</button>
+            <button class="btn btn-success" onclick="exportJSON()" id="exportBtn" disabled>📤 Export JSON</button>
+            <button class="btn btn-secondary" onclick="exportMarkdown()" id="exportMdBtn" disabled>📄 Export Markdown</button>
+            
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="setFilter('all')">All</button>
+                <button class="filter-btn" onclick="setFilter('pending')">Pending</button>
+                <button class="filter-btn" onclick="setFilter('approved')">Approved</button>
+                <button class="filter-btn" onclick="setFilter('rejected')">Rejected</button>
+                <button class="filter-btn" onclick="setFilter('unanswered')">Unanswered</button>
+            </div>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="import-section">
+                <h2>Welcome! 👋</h2>
+                <p>Start by importing JSON from Claude or create your first brainstorming session.</p>
+                <textarea id="importArea" placeholder='Paste JSON here...'></textarea>
+                <br>
+                <button class="btn btn-primary" onclick="loadJSON()">Load Data</button>
+            </div>
+        </div>
+    </div>
+    
+    <button class="fab" onclick="addNewIdea()" title="Add New Idea" style="display: none;" id="fabBtn">+</button>
+    
+    <div class="export-modal" id="exportModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Export</h2>
+            <textarea id="exportArea" readonly></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let data = null;
+        let currentVersionIndex = 0;
+        let currentFilter = 'all';
+        let autoSaveTimer = null;
+        
+        function loadJSON() {
+            const jsonText = document.getElementById('importArea').value;
+            try {
+                const parsed = JSON.parse(jsonText);
+                
+                if (!parsed.history) {
+                    parsed.history = [JSON.parse(JSON.stringify(parsed))];
+                } else if (!Array.isArray(parsed.history)) {
+                    parsed.history = [parsed];
+                }
+                
+                data = parsed;
+                currentVersionIndex = data.history.length - 1;
+                
+                updateVersionSelector();
+                renderContent();
+                loadFromLocalStorage();
+                startAutoSave();
+                
+                document.getElementById('exportBtn').disabled = false;
+                document.getElementById('exportMdBtn').disabled = false;
+                document.getElementById('fabBtn').style.display = 'block';
+            } catch (e) {
+                alert('Invalid JSON format. Please check your input.');
+                console.error(e);
+            }
+        }
+        
+        function startAutoSave() {
+            if (autoSaveTimer) clearInterval(autoSaveTimer);
+            autoSaveTimer = setInterval(saveToLocalStorage, 30000);
+        }
+        
+        function saveToLocalStorage() {
+            if (data) {
+                localStorage.setItem('brainstormData', JSON.stringify(data));
+                showSaveIndicator();
+            }
+        }
+        
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('brainstormData');
+            if (saved) {
+                try {
+                    const savedData = JSON.parse(saved);
+                    if (savedData.version === data.version) {
+                        data = savedData;
+                        renderContent();
+                    }
+                } catch (e) {
+                    console.error('Error loading from localStorage:', e);
+                }
+            }
+        }
+        
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('visible');
+            setTimeout(() => indicator.classList.remove('visible'), 2000);
+        }
+        
+        function updateVersionSelector() {
+            const select = document.getElementById('versionSelect');
+            select.innerHTML = '';
+            select.disabled = false;
+            
+            data.history.forEach((version, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `Version ${version.version} - ${new Date(version.timestamp).toLocaleString()}`;
+                select.appendChild(option);
+            });
+            
+            select.value = currentVersionIndex;
+            select.onchange = (e) => {
+                currentVersionIndex = parseInt(e.target.value);
+                renderContent();
+            };
+        }
+        
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            applyFilter();
+        }
+        
+        function applyFilter() {
+            const version = data.history[currentVersionIndex];
+            
+            version.ideas.forEach((idea, ideaIndex) => {
+                const card = document.querySelector(`.idea-card[data-idea="${ideaIndex}"]`);
+                if (!card) return;
+                
+                let shouldShow = false;
+                
+                if (currentFilter === 'all') {
+                    shouldShow = true;
+                } else if (currentFilter === 'pending') {
+                    shouldShow = idea.suggestions.some(s => !s.status || s.status === 'pending') ||
+                                idea.questions.some(q => !q.answer);
+                } else if (currentFilter === 'approved') {
+                    shouldShow = idea.suggestions.some(s => s.status === 'approved');
+                } else if (currentFilter === 'rejected') {
+                    shouldShow = idea.suggestions.some(s => s.status === 'rejected');
+                } else if (currentFilter === 'unanswered') {
+                    shouldShow = idea.questions.some(q => !q.answer && (!q.selectedOptions || q.selectedOptions.length === 0));
+                }
+                
+                if (shouldShow) {
+                    card.classList.remove('filtered-out');
+                } else {
+                    card.classList.add('filtered-out');
+                }
+            });
+        }
+        
+        function calculateAttentionCount(idea) {
+            let count = 0;
+            count += idea.suggestions.filter(s => !s.status || s.status === 'pending').length;
+            count += idea.questions.filter(q => !q.answer && (!q.selectedOptions || q.selectedOptions.length === 0)).length;
+            return count;
+        }
+        
+        function renderContent() {
+            const content = document.getElementById('content');
+            const version = data.history[currentVersionIndex];
+            
+            let html = '';
+            
+            html += `
+                <div class="version-info">
+                    <strong>Version ${version.version}</strong> | ${new Date(version.timestamp).toLocaleString()}
+                    ${version.notes ? `<br><em>${version.notes}</em>` : ''}
+                </div>
+            `;
+            
+            let totalSuggestions = 0;
+            let approvedSuggestions = 0;
+            let rejectedSuggestions = 0;
+            let totalQuestions = 0;
+            let answeredQuestions = 0;
+            
+            version.ideas.forEach(idea => {
+                totalSuggestions += idea.suggestions.length;
+                approvedSuggestions += idea.suggestions.filter(s => s.status === 'approved').length;
+                rejectedSuggestions += idea.suggestions.filter(s => s.status === 'rejected').length;
+                totalQuestions += idea.questions.length;
+                answeredQuestions += idea.questions.filter(q => q.answer || (q.selectedOptions && q.selectedOptions.length > 0)).length;
+            });
+            
+            html += `
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number">${approvedSuggestions}</div>
+                        <div class="stat-label">Approved</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">${rejectedSuggestions}</div>
+                        <div class="stat-label">Rejected</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">${totalSuggestions - approvedSuggestions - rejectedSuggestions}</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">${answeredQuestions}/${totalQuestions}</div>
+                        <div class="stat-label">Answered</div>
+                    </div>
+                </div>
+            `;
+            
+            version.ideas.forEach((idea, ideaIndex) => {
+                const attentionCount = calculateAttentionCount(idea);
+                
+                html += `
+                    <div class="idea-card" data-idea="${ideaIndex}">
+                        <div class="idea-header">
+                            <div>
+                                <div class="idea-title" id="title-${ideaIndex}">${idea.title}</div>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                ${attentionCount > 0 ? `<span class="attention-badge">${attentionCount} needs attention</span>` : ''}
+                                <div class="idea-actions">
+                                    <button class="icon-btn" onclick="editTitle(${ideaIndex})" title="Edit Title">✏️</button>
+                                    <button class="icon-btn" onclick="deleteIdea(${ideaIndex})" title="Delete Idea">🗑️</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="idea-description" id="desc-${ideaIndex}">${idea.description}</div>
+                        <button class="icon-btn" onclick="editDescription(${ideaIndex})" title="Edit Description" style="margin-bottom: 10px;">✏️ Edit Description</button>
+                        
+                        ${idea.suggestions.length > 0 ? `
+                            <div class="section">
+                                <h3>💡 Suggestions</h3>
+                                ${idea.suggestions.map((suggestion, suggestionIndex) => `
+                                    <div class="item ${suggestion.status || ''}" data-idea="${ideaIndex}" data-type="suggestion" data-index="${suggestionIndex}">
+                                        <div class="item-header">
+                                            <div class="item-text">
+                                                <span class="badge badge-${suggestion.category}">${suggestion.category}</span><br>
+                                                ${suggestion.text}
+                                            </div>
+                                            <div class="item-actions">
+                                                ${!suggestion.status || suggestion.status === 'rejected' ? `
+                                                    <button class="btn-approve" onclick="updateStatus(${ideaIndex}, 'suggestion', ${suggestionIndex}, 'approved')">✓</button>
+                                                ` : ''}
+                                                ${!suggestion.status || suggestion.status === 'approved' ? `
+                                                    <button class="btn-reject" onclick="updateStatus(${ideaIndex}, 'suggestion', ${suggestionIndex}, 'rejected')">✗</button>
+                                                ` : ''}
+                                                <button class="btn-note" onclick="toggleNote(${ideaIndex}, 'suggestion', ${suggestionIndex})">💬</button>
+                                            </div>
+                                        </div>
+                                        <div class="note-section" id="note-suggestion-${ideaIndex}-${suggestionIndex}">
+                                            <div class="note-label">${suggestion.status === 'rejected' ? 'Feedback (why rejected):' : suggestion.status === 'approved' ? 'Implementation notes:' : 'Notes:'}</div>
+                                            <textarea onchange="updateNote(${ideaIndex}, 'suggestion', ${suggestionIndex}, this.value)" placeholder="Add your notes here...">${suggestion.note || ''}</textarea>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        ${idea.questions.length > 0 ? `
+                            <div class="section">
+                                <h3>❓ Questions</h3>
+                                ${idea.questions.map((question, questionIndex) => `
+                                    <div class="item ${question.answer || (question.selectedOptions && question.selectedOptions.length > 0) ? 'approved' : ''}" data-idea="${ideaIndex}" data-type="question" data-index="${questionIndex}">
+                                        <div class="item-header">
+                                            <div class="item-text">
+                                                <span class="badge badge-${question.category}">${question.category}</span><br>
+                                                ${question.text}
+                                                ${question.responseType === 'multiple-choice' ? `
+                                                    <div class="choice-options">
+                                                        ${question.options.map((option, optIdx) => `
+                                                            <div class="choice-option">
+                                                                <input type="checkbox" id="q-${ideaIndex}-${questionIndex}-${optIdx}" 
+                                                                       ${question.selectedOptions && question.selectedOptions.includes(option) ? 'checked' : ''}
+                                                                       onchange="updateChoice(${ideaIndex}, ${questionIndex}, '${option.replace(/'/g, "\\'")}', this.checked)">
+                                                                <label for="q-${ideaIndex}-${questionIndex}-${optIdx}">${option}</label>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                            <div class="item-actions">
+                                                <button class="btn-note" onclick="toggleNote(${ideaIndex}, 'question', ${questionIndex})">💬</button>
+                                            </div>
+                                        </div>
+                                        <div class="note-section" id="note-question-${ideaIndex}-${questionIndex}">
+                                            <div class="note-label">Your answer:</div>
+                                            <textarea onchange="updateAnswer(${ideaIndex}, ${questionIndex}, this.value)" placeholder="Type your answer...">${question.answer || ''}</textarea>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = html;
+            applyFilter();
+        }
+        
+        function toggleNote(ideaIndex, type, itemIndex) {
+            const noteId = `note-${type}-${ideaIndex}-${itemIndex}`;
+            const noteSection = document.getElementById(noteId);
+            noteSection.classList.toggle('visible');
+            saveToLocalStorage();
+        }
+        
+        function updateNote(ideaIndex, type, itemIndex, note) {
+            const version = data.history[currentVersionIndex];
+            const idea = version.ideas[ideaIndex];
+            
+            if (type === 'suggestion') {
+                idea.suggestions[itemIndex].note = note;
+            } else {
+                idea.questions[itemIndex].note = note;
+            }
+            
+            saveToLocalStorage();
+        }
+        
+        function updateStatus(ideaIndex, type, itemIndex, status) {
+            const version = data.history[currentVersionIndex];
+            const idea = version.ideas[ideaIndex];
+            
+            if (type === 'suggestion') {
+                if (idea.suggestions[itemIndex].status === status) {
+                    delete idea.suggestions[itemIndex].status;
+                } else {
+                    idea.suggestions[itemIndex].status = status;
+                }
+            }
+            
+            renderContent();
+            saveToLocalStorage();
+        }
+        
+        function updateAnswer(ideaIndex, questionIndex, answer) {
+            const version = data.history[currentVersionIndex];
+            version.ideas[ideaIndex].questions[questionIndex].answer = answer;
+            saveToLocalStorage();
+        }
+        
+        function updateChoice(ideaIndex, questionIndex, option, checked) {
+            const version = data.history[currentVersionIndex];
+            const question = version.ideas[ideaIndex].questions[questionIndex];
+            
+            if (!question.selectedOptions) {
+                question.selectedOptions = [];
+            }
+            
+            if (checked) {
+                if (!question.selectedOptions.includes(option)) {
+                    question.selectedOptions.push(option);
+                }
+            } else {
+                question.selectedOptions = question.selectedOptions.filter(o => o !== option);
+            }
+            
+            renderContent();
+            saveToLocalStorage();
+        }
+        
+        function editTitle(ideaIndex) {
+            const titleEl = document.getElementById(`title-${ideaIndex}`);
+            titleEl.contentEditable = true;
+            titleEl.focus();
+            
+            titleEl.onblur = () => {
+                titleEl.contentEditable = false;
+                const version = data.history[currentVersionIndex];
+                version.ideas[ideaIndex].title = titleEl.textContent;
+                saveToLocalStorage();
+            };
+        }
+        
+        function editDescription(ideaIndex) {
+            const descEl = document.getElementById(`desc-${ideaIndex}`);
+            descEl.contentEditable = true;
+            descEl.focus();
+            
+            descEl.onblur = () => {
+                descEl.contentEditable = false;
+                const version = data.history[currentVersionIndex];
+                version.ideas[ideaIndex].description = descEl.textContent;
+                saveToLocalStorage();
+            };
+        }
+        
+        function deleteIdea(ideaIndex) {
+            if (confirm('Are you sure you want to delete this idea?')) {
+                const version = data.history[currentVersionIndex];
+                version.ideas.splice(ideaIndex, 1);
+                renderContent();
+                saveToLocalStorage();
+            }
+        }
+        
+        function addNewIdea() {
+            const version = data.history[currentVersionIndex];
+            const newIdea = {
+                id: `idea-${Date.now()}`,
+                title: 'New Idea',
+                description: 'Click edit to add your description...',
+                suggestions: [],
+                questions: []
+            };
+            version.ideas.push(newIdea);
+            renderContent();
+            saveToLocalStorage();
+        }
+        
+        function importData() {
+            document.getElementById('content').innerHTML = `
+                <div class="import-section">
+                    <h2>Import JSON</h2>
+                    <textarea id="importArea" placeholder="Paste JSON here..."></textarea>
+                    <br>
+                    <button class="btn btn-primary" onclick="loadJSON()">Load Data</button>
+                </div>
+            `;
+        }
+        
+        function exportJSON() {
+            const version = data.history[currentVersionIndex];
+            const exportData = {
+                version: version.version,
+                timestamp: version.timestamp,
+                ideas: version.ideas.map(idea => ({
+                    id: idea.id,
+                    title: idea.title,
+                    description: idea.description,
+                    suggestions: idea.suggestions.map(s => ({
+                        category: s.category,
+                        text: s.text,
+                        status: s.status || 'pending',
+                        note: s.note || '',
+                        noteType: s.status === 'rejected' ? 'avoidance_feedback' : s.status === 'approved' ? 'implementation_notes' : 'general'
+                    })),
+                    questions: idea.questions.map(q => ({
+                        category: q.category,
+                        text: q.text,
+                        answer: q.answer || '',
+                        responseType: q.responseType || 'text',
+                        options: q.options || [],
+                        selectedOptions: q.selectedOptions || [],
+                        note: q.note || ''
+                    }))
+                }))
+            };
+            
+            document.getElementById('modalTitle').textContent = 'Export JSON';
+            document.getElementById('exportArea').value = JSON.stringify(exportData, null, 2);
+            document.getElementById('exportModal').classList.add('active');
+        }
+        
+        function exportMarkdown() {
+            const version = data.history[currentVersionIndex];
+            let markdown = `# Brainstorming Session - Version ${version.version}\n\n`;
+            markdown += `*Generated: ${new Date(version.timestamp).toLocaleString()}*\n\n`;
+            
+            version.ideas.forEach(idea => {
+                markdown += `## ${idea.title}\n\n`;
+                markdown += `${idea.description}\n\n`;
+                
+                const approvedSuggestions = idea.suggestions.filter(s => s.status === 'approved');
+                if (approvedSuggestions.length > 0) {
+                    markdown += `### ✅ Approved Suggestions\n\n`;
+                    approvedSuggestions.forEach(s => {
+                        markdown += `- **[${s.category}]** ${s.text}\n`;
+                        if (s.note) {
+                            markdown += `  - *Note: ${s.note}*\n`;
+                        }
+                    });
+                    markdown += `\n`;
+                }
+                
+                const answeredQuestions = idea.questions.filter(q => q.answer || (q.selectedOptions && q.selectedOptions.length > 0));
+                if (answeredQuestions.length > 0) {
+                    markdown += `### 💬 Q&A\n\n`;
+                    answeredQuestions.forEach(q => {
+                        markdown += `**Q [${q.category}]:** ${q.text}\n\n`;
+                        if (q.selectedOptions && q.selectedOptions.length > 0) {
+                            markdown += `**A (selected):** ${q.selectedOptions.join(', ')}\n\n`;
+                        }
+                        if (q.answer) {
+                            markdown += `**A:** ${q.answer}\n\n`;
+                        }
+                    });
+                }
+                
+                markdown += `---\n\n`;
+            });
+            
+            document.getElementById('modalTitle').textContent = 'Export Markdown';
+            document.getElementById('exportArea').value = markdown;
+            document.getElementById('exportModal').classList.add('active');
+        }
+        
+        function copyToClipboard() {
+            const textarea = document.getElementById('exportArea');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        }
+        
+        function closeModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
