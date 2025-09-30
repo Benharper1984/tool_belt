@@ -516,6 +516,9 @@
             <button class="btn btn-primary" onclick="importData()">📥 Import JSON</button>
             <button class="btn btn-success" onclick="exportJSON()" id="exportBtn" disabled>📤 Export JSON</button>
             <button class="btn btn-secondary" onclick="exportMarkdown()" id="exportMdBtn" disabled>📄 Export Markdown</button>
+            <button class="btn btn-secondary" onclick="copyInstructions()">📋 Copy Setup Instructions</button>
+            <button class="btn btn-primary" onclick="manualSave()" id="saveBtn" disabled>💾 Save Now</button>
+            <button class="btn btn-secondary" onclick="clearAllData()" id="clearBtn" disabled>🗑️ Clear All</button>
             
             <div class="filter-group">
                 <button class="filter-btn active" onclick="setFilter('all')">All</button>
@@ -578,6 +581,8 @@
                 document.getElementById('exportBtn').disabled = false;
                 document.getElementById('exportMdBtn').disabled = false;
                 document.getElementById('fabBtn').style.display = 'block';
+                document.getElementById('saveBtn').disabled = false;
+                document.getElementById('clearBtn').disabled = false;
             } catch (e) {
                 alert('Invalid JSON format. Please check your input.');
                 console.error(e);
@@ -646,28 +651,32 @@
         function applyFilter() {
             const version = data.history[currentVersionIndex];
             
+            document.querySelectorAll('.idea-card').forEach(card => {
+                card.classList.remove('filtered-out');
+            });
+            
+            if (currentFilter === 'all') {
+                return;
+            }
+            
             version.ideas.forEach((idea, ideaIndex) => {
                 const card = document.querySelector(`.idea-card[data-idea="${ideaIndex}"]`);
                 if (!card) return;
                 
-                let shouldShow = false;
+                let hasMatchingItems = false;
                 
-                if (currentFilter === 'all') {
-                    shouldShow = true;
-                } else if (currentFilter === 'pending') {
-                    shouldShow = idea.suggestions.some(s => !s.status || s.status === 'pending') ||
-                                idea.questions.some(q => !q.answer);
+                if (currentFilter === 'pending') {
+                    hasMatchingItems = idea.suggestions.some(s => !s.status || s.status === 'pending') ||
+                                      idea.questions.some(q => !q.answer && (!q.selectedOptions || q.selectedOptions.length === 0));
                 } else if (currentFilter === 'approved') {
-                    shouldShow = idea.suggestions.some(s => s.status === 'approved');
+                    hasMatchingItems = idea.suggestions.some(s => s.status === 'approved');
                 } else if (currentFilter === 'rejected') {
-                    shouldShow = idea.suggestions.some(s => s.status === 'rejected');
+                    hasMatchingItems = idea.suggestions.some(s => s.status === 'rejected');
                 } else if (currentFilter === 'unanswered') {
-                    shouldShow = idea.questions.some(q => !q.answer && (!q.selectedOptions || q.selectedOptions.length === 0));
+                    hasMatchingItems = idea.questions.some(q => !q.answer && (!q.selectedOptions || q.selectedOptions.length === 0));
                 }
                 
-                if (shouldShow) {
-                    card.classList.remove('filtered-out');
-                } else {
+                if (!hasMatchingItems) {
                     card.classList.add('filtered-out');
                 }
             });
@@ -1026,6 +1035,91 @@
         
         function closeModal() {
             document.getElementById('exportModal').classList.remove('active');
+        }
+        
+        function manualSave() {
+            saveToLocalStorage();
+            alert('Progress saved!');
+        }
+        
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This will delete everything from localStorage and cannot be undone.')) {
+                localStorage.removeItem('brainstormData');
+                data = null;
+                currentVersionIndex = 0;
+                document.getElementById('exportBtn').disabled = true;
+                document.getElementById('exportMdBtn').disabled = true;
+                document.getElementById('fabBtn').style.display = 'none';
+                document.getElementById('saveBtn').disabled = true;
+                document.getElementById('clearBtn').disabled = true;
+                importData();
+            }
+        }
+        
+        function copyInstructions() {
+            const instructions = `# Brainstorming Collaborator Tool - Setup Instructions
+
+This is a workflow tool for iterative idea refinement between you and me (Claude).
+
+## How it works:
+1. You brainstorm an idea with me in chat
+2. I provide structured feedback as JSON with:
+   - Your idea description (refined based on our discussion)
+   - Categorized suggestions (feasibility, features, improvements)
+   - Categorized questions (clarification, audience, technical)
+3. You paste the JSON into the Brainstorming Collaborator app
+4. In the app, you:
+   - Approve/reject suggestions
+   - Answer questions (text, checkboxes, or multiple-choice)
+   - Add notes to explain your reasoning
+   - Edit idea descriptions directly if needed
+5. Export the updated JSON and paste it back to me
+6. I read your responses, refine the idea, and provide new suggestions/questions
+7. Repeat until the idea is polished!
+
+## JSON Format Example:
+\`\`\`json
+{
+  "version": 1,
+  "timestamp": "2025-09-28T10:00:00Z",
+  "ideas": [{
+    "id": "unique-id",
+    "title": "Idea Title",
+    "description": "Detailed description...",
+    "suggestions": [{
+      "category": "features|improvements|feasibility",
+      "text": "Suggestion text"
+    }],
+    "questions": [{
+      "category": "clarification|audience|technical",
+      "text": "Question text",
+      "responseType": "text|yes-no|multiple-choice",
+      "options": ["Option 1", "Option 2"]
+    }]
+  }]
+}
+\`\`\`
+
+## Key Behaviors:
+- Always include unanswered questions and pending suggestions in the next iteration
+- Refine/expand idea descriptions based on user answers
+- Always include an "Anything else?" question at the end
+- Treat rejected suggestion notes as feedback to avoid similar ideas
+- Treat approved suggestion notes as implementation guidance`;
+            
+            navigator.clipboard.writeText(instructions).then(() => {
+                alert('Setup instructions copied to clipboard! Paste this in your initial prompt with Claude.');
+            }).catch(() => {
+                // Fallback for older browsers
+                const modal = document.getElementById('exportModal');
+                document.getElementById('modalTitle').textContent = 'Setup Instructions';
+                document.getElementById('exportArea').value = instructions;
+                modal.classList.add('active');
+            });
+        }
+    </script>
+</body>
+</html>lassList.remove('active');
         }
     </script>
 </body>
