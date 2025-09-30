@@ -6,6 +6,7 @@
     <title>Cost Comparison Tool</title>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/components.css">
+    <script src="assets/js/utils.js"></script>
     <style>
         /* Cost comparison specific overrides */
         body { background: #f5f7fa; padding: 20px; }
@@ -143,7 +144,10 @@
                 `;
             });
             
-            const total = section.items.reduce((sum, item) => sum + (parseFloat(item.cost) || 0), 0);
+            const total = section.items.reduce((sum, item) => {
+                const cost = validateNumber(item.cost, { min: 0, allowNegative: false });
+                return sum + (cost || 0);
+            }, 0);
             rows += `
                 <tr class="total-row">
                     <td colspan="2"><strong>Total</strong></td>
@@ -189,7 +193,27 @@
         function updateItem(sectionId, itemIndex, field, value) {
             const section = sections.find(s => s.id === sectionId);
             if (section && section.items[itemIndex]) {
-                section.items[itemIndex][field] = value;
+                // Validate and sanitize input based on field type
+                let processedValue = value;
+                
+                if (field === 'cost') {
+                    const numValue = validateNumber(value, { min: 0, allowNegative: false });
+                    if (numValue !== null) {
+                        processedValue = numValue.toFixed(2);
+                    } else {
+                        processedValue = '0.00';
+                        showNotification('Invalid cost value. Please enter a positive number.', 'warning');
+                    }
+                } else {
+                    // Sanitize text fields
+                    processedValue = sanitizeHTML(String(value).trim());
+                    if (processedValue.length > 100) {
+                        processedValue = processedValue.substring(0, 100);
+                        showNotification('Text truncated to 100 characters.', 'info');
+                    }
+                }
+                
+                section.items[itemIndex][field] = processedValue;
                 renderSections();
             }
         }
@@ -208,7 +232,10 @@
             
             const totals = [];
             sections.forEach(section => {
-                const total = section.items.reduce((sum, item) => sum + (parseFloat(item.cost) || 0), 0);
+                const total = section.items.reduce((sum, item) => {
+                    const cost = validateNumber(item.cost, { min: 0, allowNegative: false });
+                    return sum + (cost || 0);
+                }, 0);
                 totals.push(total);
                 
                 const summaryItem = document.createElement('div');
@@ -269,23 +296,47 @@
         }
 
         function exportToCSV() {
-            let csv = 'Section,Item,Description,Cost\n';
-            sections.forEach(section => {
-                section.items.forEach(item => {
-                    csv += `"${section.title}","${item.name}","${item.description}","${item.cost}"\n`;
+            try {
+                const data = [];
+                sections.forEach(section => {
+                    section.items.forEach(item => {
+                        data.push({
+                            Section: section.title,
+                            Item: item.name,
+                            Description: item.description,
+                            Cost: item.cost
+                        });
+                    });
                 });
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'cost-comparison.csv';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+                
+                if (data.length === 0) {
+                    showNotification('No data to export. Please add some items first.', 'warning');
+                    return;
+                }
+                
+                const csvContent = generateCSV(data, ['Section', 'Item', 'Description', 'Cost']);
+                
+                if (!csvContent) {
+                    showNotification('Failed to generate CSV content.', 'error');
+                    return;
+                }
+                
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `cost-comparison-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showNotification(`Exported ${data.length} items to CSV successfully.`, 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification('Failed to export CSV. Please try again.', 'error');
+            }
         }
 
         function showImportFormat() {
@@ -298,56 +349,89 @@
 Section 1,Item Name,Item Description,100.00
 Section 2,Another Item,Another Description,250.50`;
             
-            navigator.clipboard.writeText(formatText).then(() => {
-                alert('Import format copied to clipboard!');
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-            });
+            copyToClipboard(formatText);
         }
 
         function importCSV() {
             const fileInput = document.getElementById('csvFile');
             const file = fileInput.files[0];
             
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const csv = e.target.result;
-                parseCSV(csv);
-                fileInput.value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        function parseCSV(csv) {
-            const lines = csv.split('\n');
-            const header = lines[0].split(',');
-            
-            if (header.length < 4 || !header.includes('Section') || !header.includes('Item') || !header.includes('Description') || !header.includes('Cost')) {
-                alert('Invalid CSV format. Please use the correct format with Section, Item, Description, and Cost columns.');
+            if (!file) {
+                showNotification('Please select a CSV file first.', 'warning');
                 return;
             }
             
-            // Clear existing data
-            sections.forEach(section => {
-                section.items = [];
+            // Validate file
+            const validation = validateFile(file, {
+                maxSize: 1024 * 1024, // 1MB
+                allowedExtensions: ['csv'],
+                allowedTypes: ['text/csv', 'application/csv', 'text/plain']
             });
             
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
+            if (!validation.valid) {
+                showNotification(`File validation failed: ${validation.errors.join(', ')}`, 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvData = parseCSV(e.target.result, { hasHeader: true });
+                    if (csvData.success) {
+                        importParsedCSV(csvData.data);
+                    } else {
+                        showNotification(csvData.error, 'error');
+                    }
+                } catch (error) {
+                    showNotification('Failed to read CSV file. Please check the file format.', 'error');
+                    console.error('CSV import error:', error);
+                }
+                fileInput.value = '';
+            };
+            
+            reader.onerror = function() {
+                showNotification('Failed to read the selected file.', 'error');
+                fileInput.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function importParsedCSV(data) {
+            try {
+                // Validate required columns
+                if (data.length === 0) {
+                    showNotification('CSV file is empty.', 'warning');
+                    return;
+                }
                 
-                const values = parseCSVLine(line);
-                if (values.length >= 4) {
-                    const sectionName = values[0].replace(/"/g, '');
-                    const itemName = values[1].replace(/"/g, '');
-                    const description = values[2].replace(/"/g, '');
-                    const cost = values[3].replace(/"/g, '');
+                const firstRow = data[0];
+                const requiredColumns = ['Section', 'Item', 'Description', 'Cost'];
+                const missingColumns = requiredColumns.filter(col => !(col in firstRow));
+                
+                if (missingColumns.length > 0) {
+                    showNotification(`Missing required columns: ${missingColumns.join(', ')}`, 'error');
+                    return;
+                }
+                
+                // Clear existing data
+                sections.forEach(section => {
+                    section.items = [];
+                });
+                
+                let importedItems = 0;
+                
+                data.forEach(row => {
+                    const sectionName = String(row.Section || '').trim();
+                    const itemName = String(row.Item || 'New Item').trim();
+                    const description = String(row.Description || 'Description').trim();
+                    const cost = validateNumber(row.Cost, { min: 0, allowNegative: false }) || 0;
+                    
+                    if (!sectionName) return; // Skip rows without section name
                     
                     let section = sections.find(s => s.title.toLowerCase() === sectionName.toLowerCase());
                     if (!section) {
-                        // Find first empty section or create new one
+                        // Find first empty section or reuse existing
                         section = sections.find(s => s.items.length === 0);
                         if (section) {
                             section.title = sectionName;
@@ -358,35 +442,19 @@ Section 2,Another Item,Another Description,250.50`;
                         section.items.push({
                             name: itemName,
                             description: description,
-                            cost: cost
+                            cost: cost.toFixed(2)
                         });
+                        importedItems++;
                     }
-                }
+                });
+                
+                renderSections();
+                showNotification(`Successfully imported ${importedItems} items from CSV.`, 'success');
+                
+            } catch (error) {
+                console.error('CSV import processing error:', error);
+                showNotification('An error occurred while processing the CSV data.', 'error');
             }
-            
-            renderSections();
-            alert('CSV data imported successfully!');
-        }
-
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current);
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            result.push(current);
-            
-            return result;
         }
 
         // Initialize the application
