@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brainstorming Collaborator</title>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/ui.js"></script>
     <style>
         * {
             margin: 0;
@@ -1028,9 +1030,10 @@
         
         function copyToClipboard() {
             const textarea = document.getElementById('exportArea');
-            textarea.select();
-            document.execCommand('copy');
-            alert('Copied to clipboard!');
+            const textToCopy = textarea.value;
+            
+            // Use the enhanced copyToClipboard function from utils.js
+            window.copyToClipboard(textToCopy);
         }
         
         function closeModal() {
@@ -1107,15 +1110,8 @@ This is a workflow tool for iterative idea refinement between you and me (Claude
 - Treat rejected suggestion notes as feedback to avoid similar ideas
 - Treat approved suggestion notes as implementation guidance`;
             
-            navigator.clipboard.writeText(instructions).then(() => {
-                alert('Setup instructions copied to clipboard! Paste this in your initial prompt with Claude.');
-            }).catch(() => {
-                // Fallback for older browsers
-                const modal = document.getElementById('exportModal');
-                document.getElementById('modalTitle').textContent = 'Setup Instructions';
-                document.getElementById('exportArea').value = instructions;
-                modal.classList.add('active');
-            });
+            // Use the enhanced copyToClipboard function from utils.js
+            window.copyToClipboard(instructions);
         }
     </script>
 </body>

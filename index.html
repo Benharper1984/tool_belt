@@ -6,6 +6,8 @@
     <title>Tool Belt - Professional Utility Tools</title>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/components.css">
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/ui.js"></script>
 </head>
 <body>
     <header class="header">
@@ -228,87 +230,16 @@
     </footer>
 
     <script>
-        // Navigation function
+        // Navigation function - handled by shared UI module
         function navigateToTool(toolPath) {
-            // Only navigate if the tool is available (not coming soon)
             const clickedCard = event.currentTarget;
             if (clickedCard.classList.contains('available')) {
-                window.location.href = toolPath;
+                window.ToolBeltUI.navigateToTool(toolPath);
             }
         }
 
-        // Add some interactive effects
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.tool-card');
-            
-            cards.forEach(card => {
-                // Add click effect for available tools
-                if (card.classList.contains('available')) {
-                    card.addEventListener('click', function() {
-                        // Add a brief click animation
-                        this.style.transform = 'scale(0.98)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 150);
-                    });
-                }
-
-                // Add hover sound effect placeholder (you could add actual sounds here)
-                card.addEventListener('mouseenter', function() {
-                    if (this.classList.contains('available')) {
-                        // Placeholder for hover sound
-                        console.log('Tool card hovered:', this.querySelector('.tool-title').textContent);
-                    }
-                });
-            });
-
-            // Add keyboard navigation
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && document.activeElement.classList.contains('tool-card')) {
-                    document.activeElement.click();
-                }
-            });
-
-            // Make tool cards focusable for accessibility
-            cards.forEach(card => {
-                if (card.classList.contains('available')) {
-                    card.setAttribute('tabindex', '0');
-                    card.setAttribute('role', 'button');
-                    card.setAttribute('aria-label', 'Navigate to ' + card.querySelector('.tool-title').textContent);
-                }
-            });
-        });
-
-        // Add a subtle parallax effect to the header
-        window.addEventListener('scroll', function() {
-            const scrolled = window.pageYOffset;
-            const header = document.querySelector('.header');
-            const rate = scrolled * -0.5;
-            header.style.transform = `translateY(${rate}px)`;
-        });
-
-        // Future tool suggestion system (placeholder)
-        function suggestNewTool() {
-            const suggestions = [
-                'Loan Calculator',
-                'Energy Efficiency Calculator', 
-                'Paint Coverage Calculator',
-                'Landscaping Planner',
-                'Equipment Rental Tracker'
-            ];
-            
-            const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
-            console.log(`Future tool suggestion: ${randomSuggestion}`);
-            
-            // This could be connected to a feedback system
-            return randomSuggestion;
-        }
-
-        // Analytics placeholder (you could integrate with Google Analytics, etc.)
-        function trackToolUsage(toolName) {
-            console.log(`Tool accessed: ${toolName} at ${new Date().toISOString()}`);
-            // Add your analytics code here
-        }
+        // All other UI functionality is handled by the shared UI module (ui.js)
+        // See assets/js/ui.js for keyboard navigation, tool card effects, parallax, etc.
     </script>
 </body>
 </html>
