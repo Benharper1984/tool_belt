@@ -550,7 +550,7 @@
             <h2 id="modalTitle">Export</h2>
             <textarea id="exportArea" readonly></textarea>
             <div class="modal-actions">
-                <button class="btn btn-primary" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                <button class="btn btn-primary" onclick="copyExportContent()">📋 Copy to Clipboard</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Close</button>
             </div>
         </div>
@@ -1029,12 +1029,12 @@
             document.getElementById('exportModal').classList.add('active');
         }
         
-        function copyToClipboard() {
+        function copyExportContent() {
             const textarea = document.getElementById('exportArea');
             const textToCopy = textarea.value;
             
             // Use the enhanced copyToClipboard function from utils.js
-            window.copyToClipboard(textToCopy);
+            copyToClipboard(textToCopy);
         }
         
         function closeModal() {
