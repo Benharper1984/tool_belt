@@ -23,7 +23,8 @@ class ToolBeltAnalytics {
         this.trackPageLoad();
         this.trackUserInteractions();
         this.trackErrors();
-        this.trackPerformance();
+        this.trackScrollDepth();
+        this.trackTimeOnPage();
         this.setupBeforeUnload();
         
         console.log('ToolBelt Analytics initialized');
@@ -472,17 +473,44 @@ class ToolBeltAnalytics {
     }
 }
 
-// Initialize global analytics
-window.ToolBeltAnalytics = new ToolBeltAnalytics();
+// Initialize global analytics when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    window.ToolBeltAnalytics = new ToolBeltAnalytics();
+    
+    // Expose useful methods globally
+    window.trackEvent = function(eventName, data) {
+        if (window.ToolBeltAnalytics && window.ToolBeltAnalytics.trackEvent) {
+            window.ToolBeltAnalytics.trackEvent(eventName, data);
+        }
+    };
 
-// Expose useful methods globally
-window.trackEvent = function(eventName, data) {
-    window.ToolBeltAnalytics.trackEvent(eventName, data);
-};
+    window.trackToolUsage = function(toolName, data) {
+        if (window.ToolBeltAnalytics && window.ToolBeltAnalytics.trackToolUsage) {
+            window.ToolBeltAnalytics.trackToolUsage(toolName, data);
+        }
+    };
+});
 
-window.trackToolUsage = function(toolName, data) {
-    window.ToolBeltAnalytics.trackToolUsage(toolName, data);
-};
+// Initialize immediately if DOM is already loaded
+if (document.readyState === 'loading') {
+    // DOM is still loading, wait for DOMContentLoaded
+} else {
+    // DOM is already loaded
+    window.ToolBeltAnalytics = new ToolBeltAnalytics();
+    
+    // Expose useful methods globally
+    window.trackEvent = function(eventName, data) {
+        if (window.ToolBeltAnalytics && window.ToolBeltAnalytics.trackEvent) {
+            window.ToolBeltAnalytics.trackEvent(eventName, data);
+        }
+    };
+
+    window.trackToolUsage = function(toolName, data) {
+        if (window.ToolBeltAnalytics && window.ToolBeltAnalytics.trackToolUsage) {
+            window.ToolBeltAnalytics.trackToolUsage(toolName, data);
+        }
+    };
+}
 
 // Auto-export analytics data for debugging (in development)
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
